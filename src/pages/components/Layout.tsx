@@ -2,7 +2,10 @@ import { Box } from '@chakra-ui/react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import React, { ReactNode } from 'react';
+import { useRecoilValue } from 'recoil';
+import { loadingState } from '../../../store';
 import Header from './Header';
+import Loading from './Loading';
 
 type Props = {
   children: ReactNode;
@@ -11,9 +14,11 @@ type Props = {
 const Layout = ({ children }: Props) => {
   const router = useRouter();
   const path = router.pathname;
-  console.log(path);
+  const loading = useRecoilValue(loadingState);
+
   return (
     <Box minH='100vh' bg='gray.100'>
+      {loading && <Loading />}
       {path !== '/login' && path !== '/register' && <Header />}
       {children}
     </Box>

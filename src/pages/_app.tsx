@@ -3,7 +3,7 @@ import type { AppProps } from 'next/app';
 import { ChakraProvider } from '@chakra-ui/react';
 import { extendTheme } from '@chakra-ui/react';
 import Layout from './components/Layout';
-
+import { RecoilRoot } from 'recoil';
 const colors = {
   brand: {
     900: '#1a365d',
@@ -21,9 +21,11 @@ const theme = extendTheme({ colors, fonts });
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <ChakraProvider theme={theme}>
-      <Layout>
-        <Component {...pageProps} />
-      </Layout>
+      <RecoilRoot>
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
+      </RecoilRoot>
     </ChakraProvider>
   );
 }
