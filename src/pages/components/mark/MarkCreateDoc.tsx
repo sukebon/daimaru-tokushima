@@ -37,7 +37,7 @@ import { auth, db, storage } from '../../../../firebase';
 import { loadingState } from '../../../../store';
 
 type Props = {
-  pasteMarkDoc: any;
+  pasteMarkDoc: Function;
 };
 
 const MarkCreateDoc: NextPage<Props> = ({ pasteMarkDoc }) => {

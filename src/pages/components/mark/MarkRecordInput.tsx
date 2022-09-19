@@ -18,7 +18,7 @@ type Props = {
     quantity: number | null;
     remarks: string;
   };
-  setRecord: any;
+  setRecord: Function;
 };
 
 const RecordInput: NextPage<Props> = ({ record, setRecord }) => {

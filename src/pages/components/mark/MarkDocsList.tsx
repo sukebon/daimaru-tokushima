@@ -21,8 +21,8 @@ import {
 } from '@chakra-ui/react';
 
 type Props = {
-  pasteMarkDoc: any;
-  onClose: any;
+  pasteMarkDoc: Function;
+  onClose: Function;
   switching: boolean;
 };
 

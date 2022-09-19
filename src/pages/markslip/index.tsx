@@ -1,6 +1,8 @@
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import {
+  Button,
   Container,
-  slideFadeConfig,
   Table,
   TableContainer,
   Tbody,
@@ -10,10 +12,9 @@ import {
   Tr,
 } from '@chakra-ui/react';
 import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react';
 import { db } from '../../../firebase';
 
-const Marking = () => {
+const MarkSlips = () => {
   const [markSlips, setMarkSlips] = useState<any>([]);
 
   // マーク伝票一覧取得
@@ -45,7 +46,7 @@ const Marking = () => {
     let sum = 0;
     array.forEach((item: { quantity: number }) => {
       if (!item.quantity) return;
-      sum += item.quantity;
+      sum += Number(item.quantity);
     });
     return sum;
   };
@@ -63,6 +64,7 @@ const Marking = () => {
               <Th>修理代</Th>
               <Th>合計数量</Th>
               <Th>納品先</Th>
+              <Th></Th>
             </Tr>
           </Thead>
           <Tbody>
@@ -90,6 +92,13 @@ const Marking = () => {
                   <Td> {slips.price}</Td>
                   <Td>{sumQuantity(slips.data)}</Td>
                   <Td> {slips.deliveryPlace}</Td>
+                  <Td>
+                    <Link href={`/markslip/${slips.id}`}>
+                      <a>
+                        <Button>詳細</Button>
+                      </a>
+                    </Link>
+                  </Td>
                 </Tr>
               )
             )}
@@ -100,4 +109,4 @@ const Marking = () => {
   );
 };
 
-export default Marking;
+export default MarkSlips;

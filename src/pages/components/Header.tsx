@@ -77,12 +77,12 @@ const Header = () => {
               <Menu>
                 <MenuButton>マーク伝票</MenuButton>
                 <MenuList>
-                  <Link href='/mark/new'>
+                  <Link href='/markslip/new'>
                     <a>
                       <MenuItem>伝票作成</MenuItem>
                     </a>
                   </Link>
-                  <Link href='/mark'>
+                  <Link href='/markslip'>
                     <a>
                       <MenuItem>伝票一覧</MenuItem>
                     </a>

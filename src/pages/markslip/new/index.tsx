@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable react/no-children-prop */
 import React, { useState } from 'react';
 import Head from 'next/head';
@@ -33,7 +34,6 @@ const MarkNew = () => {
   const [textArea, setTextArea] = useState('');
   const currentUser = useAuthState(auth);
   const currentUserId = currentUser[0] && currentUser[0]?.uid;
-
   const [customer, setCustomer] = useState('');
   const [deliveryPlace, setDeliveryPlace] = useState('');
   const [deadline, setDeadline] = useState('');
@@ -129,6 +129,7 @@ const MarkNew = () => {
           repairName,
           deliveryPlace,
           price: Number(price),
+          note,
           url,
           createdAt: serverTimestamp(),
           data: [

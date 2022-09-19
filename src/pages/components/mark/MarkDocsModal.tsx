@@ -16,7 +16,7 @@ import { NextPage } from 'next';
 import MarkDocsList from './MarkDocsList';
 
 type Props = {
-  pasteMarkDoc: any;
+  pasteMarkDoc: Function;
 };
 
 const MarkDocsModal: NextPage<Props> = ({ pasteMarkDoc }) => {
