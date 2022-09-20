@@ -1,20 +1,20 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable react/no-children-prop */
-import React, { useState } from 'react';
-import Head from 'next/head';
+import React, { useState } from "react";
+import Head from "next/head";
 import {
   doc,
   getDoc,
   runTransaction,
   serverTimestamp,
-} from 'firebase/firestore';
-import { auth, db } from '../../../../firebase';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import MarkRecordInput from '../../components/mark/MarkRecordInput';
-import MarkCreateDoc from '../../components/mark/MarkCreateDoc';
-import MarkNotePasteModal from '../../components/mark/MarkNotePasteModal';
-import MarkDocsModal from '../../components/mark/MarkDocsModal';
-import { AiFillCloseCircle } from 'react-icons/ai';
+} from "firebase/firestore";
+import { auth, db } from "../../../../firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
+import MarkRecordInput from "../../components/mark/MarkRecordInput";
+import MarkCreateDoc from "../../components/mark/MarkCreateDoc";
+import MarkNotePasteModal from "../../components/mark/MarkNotePasteModal";
+import MarkDocsModal from "../../components/mark/MarkDocsModal";
+import { AiFillCloseCircle } from "react-icons/ai";
 import {
   Box,
   Button,
@@ -26,28 +26,28 @@ import {
   InputLeftAddon,
   InputRightAddon,
   Textarea,
-} from '@chakra-ui/react';
-import { useRouter } from 'next/router';
+} from "@chakra-ui/react";
+import { useRouter } from "next/router";
 
 const MarkNew = () => {
   const router = useRouter();
-  const [textArea, setTextArea] = useState('');
+  const [textArea, setTextArea] = useState("");
   const currentUser = useAuthState(auth);
   const currentUserId = currentUser[0] && currentUser[0]?.uid;
-  const [customer, setCustomer] = useState('');
-  const [deliveryPlace, setDeliveryPlace] = useState('');
-  const [deadline, setDeadline] = useState('');
-  const [price, setPrice] = useState('');
-  const [note, setNote] = useState('');
-  const [repairName, setRepairName] = useState('');
-  const [markDocId, setMarkDocId] = useState('');
+  const [customer, setCustomer] = useState("");
+  const [deliveryPlace, setDeliveryPlace] = useState("");
+  const [deadline, setDeadline] = useState("");
+  const [price, setPrice] = useState("");
+  const [note, setNote] = useState("");
+  const [repairName, setRepairName] = useState("");
+  const [markDocId, setMarkDocId] = useState("");
   const [url, setUrl] = useState<any>();
 
   const initData = {
-    productName: '',
-    size: '',
+    productName: "",
+    size: "",
     quantity: null,
-    remarks: '',
+    remarks: "",
   };
 
   const [record_0, setRecord_0] = useState(initData);
@@ -64,17 +64,17 @@ const MarkNew = () => {
   // 営業ノートを貼り付ける
   const notePaste = () => {
     const newArray = textArea
-      .split('\n')
+      .split("\n")
       .map((record) => {
-        const field = record.split('   ');
+        const field = record.split("   ");
         return field;
       })
       .map((array: any) => {
         return {
-          productName: array[0] || '',
-          size: array[1] || '',
-          quantity: array[2] || '',
-          remarks: array[3] || '',
+          productName: array[0] || "",
+          size: array[1] || "",
+          quantity: array[2] || "",
+          remarks: array[3] || "",
         };
       });
 
@@ -104,16 +104,16 @@ const MarkNew = () => {
 
   // マーク伝票を登録
   const addMarkSlip = async () => {
-    const result = window.confirm('登録して宜しいでしょうか');
+    const result = window.confirm("登録して宜しいでしょうか");
     if (!result) return;
     try {
       await runTransaction(db, async (transaction) => {
         // 更新前の伝票NO.を取得
-        const markNumberRef = doc(db, 'markNumber', 'serialNumber');
+        const markNumberRef = doc(db, "markNumber", "serialNumber");
         const markNumberSnap = await transaction.get(markNumberRef);
 
         if (!markNumberSnap.exists()) {
-          throw 'マーク伝票 document does not exist!';
+          throw "マーク伝票 document does not exist!";
         }
         // 伝票NOを更新
         let count = await markNumberSnap.data().count;
@@ -121,7 +121,7 @@ const MarkNew = () => {
         transaction.update(markNumberRef, { count: count });
 
         //マーク伝票を作成
-        const markSlipsRef = doc(db, 'markSlips', `${count}`);
+        const markSlipsRef = doc(db, "markSlips", `${count}`);
         transaction.set(markSlipsRef, {
           uid: currentUserId,
           customer,
@@ -149,18 +149,18 @@ const MarkNew = () => {
     } catch (err) {
       console.log(err);
     } finally {
-      router.push('/mark');
+      router.push("/markslip");
     }
   };
 
   const onClear = () => {
-    setCustomer('');
-    setDeliveryPlace('');
-    setDeadline('');
-    setPrice('');
-    setNote('');
-    setRepairName('');
-    setUrl('');
+    setCustomer("");
+    setDeliveryPlace("");
+    setDeadline("");
+    setPrice("");
+    setNote("");
+    setRepairName("");
+    setUrl("");
     setRecord_0(initData);
     setRecord_1(initData);
     setRecord_2(initData);
@@ -174,7 +174,7 @@ const MarkNew = () => {
   };
 
   const pasteMarkDoc = async (id: string) => {
-    const markRef = doc(db, 'markDocs', `${id}`);
+    const markRef = doc(db, "markDocs", `${id}`);
     setMarkDocId(id);
     const docSnap = await getDoc(markRef);
     if (docSnap.exists()) {
@@ -191,13 +191,13 @@ const MarkNew = () => {
     <Box>
       <Head>
         <title>大丸白衣 徳島工場</title>
-        <meta name='description' content='Generated by create next app' />
-        <link rel='icon' href='/favicon.ico' />
+        <meta name="description" content="Generated by create next app" />
+        <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main>
-        <Container maxW='1000px' mt={6} p={6}>
-          <Flex justifyContent='space-between'>
+        <Container maxW="1000px" mt={6} p={6}>
+          <Flex justifyContent="space-between">
             <HStack spacing={2}>
               <MarkNotePasteModal
                 textArea={textArea}
@@ -208,48 +208,48 @@ const MarkNew = () => {
               <MarkCreateDoc pasteMarkDoc={pasteMarkDoc} />
               <Button
                 onClick={onClear}
-                colorScheme='gray'
-                border='1px solid #d5d6d9'
+                colorScheme="gray"
+                border="1px solid #d5d6d9"
               >
                 クリア
               </Button>
             </HStack>
-            <Button px={8} colorScheme='blue' onClick={() => addMarkSlip()}>
+            <Button px={8} colorScheme="blue" onClick={() => addMarkSlip()}>
               登録
             </Button>
           </Flex>
 
           <Box mt={12}>
-            <Box as='h1' textAlign='center' fontSize='2xl' fontWeight='bold'>
+            <Box as="h1" textAlign="center" fontSize="2xl" fontWeight="bold">
               マーク伝票
             </Box>
-            <Flex mt={6} flexDirection={{ base: 'column', md: 'row' }} gap={3}>
-              <InputGroup w={{ base: '100%', md: '70%' }}>
-                <InputLeftAddon children='顧客名' borderColor='#d5d6d9' />
+            <Flex mt={6} flexDirection={{ base: "column", md: "row" }} gap={3}>
+              <InputGroup w={{ base: "100%", md: "70%" }}>
+                <InputLeftAddon children="顧客名" borderColor="#d5d6d9" />
                 <Input
-                  type='text'
-                  bgColor='white'
+                  type="text"
+                  bgColor="white"
                   value={customer}
                   onChange={(e) => setCustomer(e.target.value)}
                 />
               </InputGroup>
-              <InputGroup w={{ base: '100%', md: '30%' }}>
-                <InputLeftAddon children='希望納期' borderColor='#d5d6d9' />
+              <InputGroup w={{ base: "100%", md: "30%" }}>
+                <InputLeftAddon children="希望納期" borderColor="#d5d6d9" />
                 <Input
-                  type='date'
-                  bgColor='white'
+                  type="date"
+                  bgColor="white"
                   value={deadline}
                   onChange={(e) => setDeadline(e.target.value)}
                 />
               </InputGroup>
             </Flex>
 
-            <Flex mt={3} flexDirection={{ base: 'column', md: 'row' }} gap={3}>
-              <InputGroup w={{ base: '100%', md: '100%' }}>
-                <InputLeftAddon children='納品先' borderColor='#d5d6d9' />
+            <Flex mt={3} flexDirection={{ base: "column", md: "row" }} gap={3}>
+              <InputGroup w={{ base: "100%", md: "100%" }}>
+                <InputLeftAddon children="納品先" borderColor="#d5d6d9" />
                 <Input
-                  type='text'
-                  bgColor='white'
+                  type="text"
+                  bgColor="white"
                   value={deliveryPlace}
                   onChange={(e) => setDeliveryPlace(e.target.value)}
                 />
@@ -257,19 +257,19 @@ const MarkNew = () => {
             </Flex>
 
             <Flex mt={6}>
-              <Box flex='1' textAlign='center'>
+              <Box flex="1" textAlign="center">
                 商品名
               </Box>
-              <Box w='80px' textAlign='center'>
+              <Box w="80px" textAlign="center">
                 サイズ
               </Box>
-              <Box w='100px' textAlign='center'>
+              <Box w="100px" textAlign="center">
                 数量
               </Box>
-              <Box w='200px' textAlign='center'>
+              <Box w="200px" textAlign="center">
                 備考
               </Box>
-              <Box w='60px' textAlign='center' ml={1}></Box>
+              <Box w="60px" textAlign="center" ml={1}></Box>
             </Flex>
             <MarkRecordInput record={record_0} setRecord={setRecord_0} />
             <MarkRecordInput record={record_1} setRecord={setRecord_1} />
@@ -283,53 +283,53 @@ const MarkNew = () => {
             <MarkRecordInput record={record_9} setRecord={setRecord_9} />
           </Box>
 
-          <Flex mt={12} flexDirection={{ base: 'column', md: 'row' }} gap={3}>
-            <InputGroup w={{ base: '100%', md: '70%' }}>
-              <InputLeftAddon children='修理名' borderColor='#d5d6d9' />
+          <Flex mt={12} flexDirection={{ base: "column", md: "row" }} gap={3}>
+            <InputGroup w={{ base: "100%", md: "70%" }}>
+              <InputLeftAddon children="修理名" borderColor="#d5d6d9" />
               <Input
-                type='text'
-                bgColor='white'
+                type="text"
+                bgColor="white"
                 value={repairName}
                 onChange={(e) => setRepairName(e.target.value)}
               />
             </InputGroup>
-            <InputGroup w={{ base: '100%', md: '30%' }}>
-              <InputLeftAddon children='修理代' borderColor='#d5d6d9' />
+            <InputGroup w={{ base: "100%", md: "30%" }}>
+              <InputLeftAddon children="修理代" borderColor="#d5d6d9" />
               <Input
-                type='number'
-                bgColor='white'
-                textAlign='right'
+                type="number"
+                bgColor="white"
+                textAlign="right"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
               />
-              <InputRightAddon children='円' borderColor='#d5d6d9' />
+              <InputRightAddon children="円" borderColor="#d5d6d9" />
             </InputGroup>
           </Flex>
 
           <Textarea
             mt={6}
-            background='white'
-            whiteSpace='pre-wrap'
-            minH='15rem'
-            placeholder='内容：'
+            background="white"
+            whiteSpace="pre-wrap"
+            minH="15rem"
+            placeholder="内容："
             value={note}
             onChange={(e) => setNote(e.target.value)}
           />
           {url &&
             url.map((image: any) => (
-              <Box key={image} mt={6} position='relative'>
-                <img src={image} alt={image} width='100%' height='auto' />
+              <Box key={image} mt={6} position="relative">
+                <img src={image} alt={image} width="100%" height="auto" />
                 <Box
-                  position='absolute'
-                  top='-18px'
-                  left='50%'
-                  transform='translateX(-50%)'
-                  borderRadius='50%'
-                  bgColor='white'
-                  cursor='pointer'
+                  position="absolute"
+                  top="-18px"
+                  left="50%"
+                  transform="translateX(-50%)"
+                  borderRadius="50%"
+                  bgColor="white"
+                  cursor="pointer"
                   onClick={() => setUrl(null)}
                 >
-                  <AiFillCloseCircle fontSize='36px' />
+                  <AiFillCloseCircle fontSize="36px" />
                 </Box>
               </Box>
             ))}
