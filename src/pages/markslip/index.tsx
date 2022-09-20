@@ -54,7 +54,7 @@ const MarkSlips = () => {
   return (
     <Container maxW='1500px' mt={12} p={6} bgColor='white'>
       <TableContainer>
-        <Table variant='simple' size='md'>
+        <Table variant='simple' size='sm' fontSize='sm'>
           <Thead>
             <Tr>
               <Th>伝票NO.</Th>
@@ -93,9 +93,9 @@ const MarkSlips = () => {
                   <Td>{sumQuantity(slips.data)}</Td>
                   <Td> {slips.deliveryPlace}</Td>
                   <Td>
-                    <Link href={`/markslip/${slips.id}`}>
+                    <Link href={`/markslip/print/${slips.id}`}>
                       <a>
-                        <Button>詳細</Button>
+                        <Button size='sm'>詳細</Button>
                       </a>
                     </Link>
                   </Td>

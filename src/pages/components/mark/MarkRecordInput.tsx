@@ -21,12 +21,7 @@ type Props = {
   setRecord: Function;
 };
 
-const RecordInput: NextPage<Props> = ({ record, setRecord }) => {
-  const hankaku = (str: any) => {
-    return str.replace(/[Ａ-Ｚａ-ｚ０-９]/g, function (s: any) {
-      return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
-    });
-  };
+const MarkRecordInput: NextPage<Props> = ({ record, setRecord }) => {
   return (
     <>
       {record && (
@@ -43,7 +38,7 @@ const RecordInput: NextPage<Props> = ({ record, setRecord }) => {
           <Input
             bgColor='white'
             textAlign='center'
-            w='80px'
+            w='130px'
             type='text'
             value={record.size}
             onChange={(e) => setRecord({ ...record, size: e.target.value })}
@@ -51,7 +46,7 @@ const RecordInput: NextPage<Props> = ({ record, setRecord }) => {
           <NumberInput
             min={1}
             bgColor='white'
-            w='100px'
+            w='130px'
             value={!record.quantity ? '' : Number(record.quantity)}
             onChange={(e) => setRecord({ ...record, quantity: Number(e) })}
           >
@@ -93,4 +88,4 @@ const RecordInput: NextPage<Props> = ({ record, setRecord }) => {
   );
 };
 
-export default RecordInput;
+export default MarkRecordInput;

@@ -9,11 +9,9 @@ import {
   Button,
   Heading,
   useColorModeValue,
+  useToast,
 } from '@chakra-ui/react';
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-} from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { auth } from '../../firebase';
@@ -22,30 +20,35 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
+  const toast = useToast();
 
-  const createUser = () => {
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed in
-        const user = userCredential.user;
-        router.push('/');
-        // ...
-      })
-      .catch((error) => {
-        console.log(error.code);
-        console.log(error.message);
-        // ..
-      });
-  };
+  // const createUser = () => {
+  //   createUserWithEmailAndPassword(auth, email, password)
+  //     .then((userCredential) => {
+  //       const user = userCredential.user;
+  //       router.push('/');
+  //       // ...
+  //     })
+  //     .catch((error) => {
+  //       console.log(error.code);
+  //       console.log(error.message);
+  //       // ..
+  //     });
+  // };
   const loginUser = () => {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
-        window.alert('成功');
+        toast({
+          title: 'ログインしました',
+          status: 'success',
+          duration: 1000,
+          isClosable: true,
+        });
         const user = userCredential.user;
         router.push('/');
-        // ...
       })
       .catch((error) => {
+        window.alert('ログインに失敗しました');
         console.log(error.code);
         console.log(error.message);
       });
@@ -61,7 +64,7 @@ export default function Login() {
       <Stack spacing={8} mx={'auto'} maxW={'lg'} py={12} px={6}>
         <Stack align={'center'}>
           <LockIcon boxSize={6} />
-          <Heading fontSize={'4xl'}>Sign in to your account</Heading>
+          <Heading fontSize={'4xl'}>Sign in</Heading>
         </Stack>
         <Box
           rounded={'lg'}

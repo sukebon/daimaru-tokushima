@@ -26,3 +26,9 @@ a {
     background: black;
   }
 }
+
+@media print {
+  td {
+    border-bottom: 1px solid black;
+  }
+}
