@@ -22,7 +22,7 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import ReactToPrint from 'react-to-print';
 import { auth, db } from '../../../../firebase';
 import MarkRecord from '../../components/mark/MarkRecord';
-import { numberOfDigits } from '../../functions';
+import { numberOfDigits } from '../../../../functions';
 
 const MarkSlipPrintId = () => {
   const componentRef = useRef(null);
