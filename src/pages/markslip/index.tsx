@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   Button,
   Container,
@@ -10,9 +10,9 @@ import {
   Th,
   Thead,
   Tr,
-} from '@chakra-ui/react';
-import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
-import { db } from '../../../firebase';
+} from "@chakra-ui/react";
+import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { db } from "../../../firebase";
 
 const MarkSlips = () => {
   const [markSlips, setMarkSlips] = useState<any>([]);
@@ -21,8 +21,8 @@ const MarkSlips = () => {
   useEffect(() => {
     const getMarkSlips = async () => {
       const q = query(
-        collection(db, 'markSlips'),
-        orderBy('createdAt', 'desc')
+        collection(db, "markSlips"),
+        orderBy("createdAt", "desc")
       );
       onSnapshot(q, (querySnapshot) => {
         setMarkSlips(
@@ -37,7 +37,7 @@ const MarkSlips = () => {
   }, []);
 
   const numberOfDigits = (serialNumber: string) => {
-    let number = '00000000000' + serialNumber;
+    let number = "00000000000" + serialNumber;
     number = number.slice(-11);
     return number;
   };
@@ -52,9 +52,9 @@ const MarkSlips = () => {
   };
 
   return (
-    <Container maxW='1500px' mt={12} p={6} bgColor='white'>
+    <Container maxW="1500px" mt={12} p={6} bgColor="white">
       <TableContainer>
-        <Table variant='simple' size='sm' fontSize='sm'>
+        <Table variant="simple" size="sm" fontSize="sm">
           <Thead>
             <Tr>
               <Th>伝票NO.</Th>
@@ -95,7 +95,7 @@ const MarkSlips = () => {
                   <Td>
                     <Link href={`/markslip/print/${slips.id}`}>
                       <a>
-                        <Button size='sm'>詳細</Button>
+                        <Button size="sm">詳細</Button>
                       </a>
                     </Link>
                   </Td>
