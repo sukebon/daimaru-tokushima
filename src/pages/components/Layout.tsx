@@ -17,7 +17,7 @@ const Layout = ({ children }: Props) => {
   const loading = useRecoilValue(loadingState);
 
   return (
-    <Box minH='100vh' bg='gray.100'>
+    <Box minH='100vh' bg='#fafafa'>
       {loading && <Loading />}
       {path !== '/login' && path !== '/register' && <Header />}
       {children}

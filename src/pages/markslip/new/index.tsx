@@ -133,6 +133,7 @@ const MarkNew = () => {
           price: Number(price),
           note,
           url,
+          assort: 0,
           createdAt: serverTimestamp(),
           data: [
             record_0,
