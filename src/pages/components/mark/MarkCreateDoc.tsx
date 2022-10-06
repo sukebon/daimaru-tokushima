@@ -3,7 +3,6 @@
 import { useRef, useState } from 'react';
 import { NextPage } from 'next';
 import {
-  Box,
   Button,
   Drawer,
   DrawerBody,
@@ -12,16 +11,16 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerOverlay,
-  Input,
-  InputGroup,
-  InputLeftAddon,
-  InputRightAddon,
-  Text,
-  Textarea,
+  Flex,
   useDisclosure,
-  VStack,
   useToast,
 } from '@chakra-ui/react';
+
+import MarkCreateInputArea from './MarkCreateInputArea';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth, db, storage } from '../../../../firebase';
+import { useRecoilState } from 'recoil';
+import { loadingState } from '../../../../store';
 import {
   addDoc,
   arrayUnion,
@@ -30,25 +29,23 @@ import {
   updateDoc,
 } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { AiFillCloseCircle } from 'react-icons/ai';
-import { useRecoilState } from 'recoil';
-import { auth, db, storage } from '../../../../firebase';
-import { loadingState } from '../../../../store';
 
 type Props = {
   pasteMarkDoc: Function;
 };
 
 const MarkCreateDoc: NextPage<Props> = ({ pasteMarkDoc }) => {
-  const currentUser = useAuthState(auth);
-  const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = useRef(null);
-  const [repairName, setRepairName] = useState('');
-  const [customer, setCustomer] = useState('');
-  const [deliveryPlace, setDeliveryPlace] = useState('');
-  const [price, setPrice] = useState('');
-  const [note, setNote] = useState('');
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const currentUser = useAuthState(auth);
+  const initMarkItems = {
+    customer: '',
+    repairName: '',
+    deliveryPlace: '',
+    price: '',
+    note: '',
+  };
+  const [markItems, setMarkItems] = useState(initMarkItems);
   const [fileUpload, setFileUpload] = useState<File | any>(null);
   const [loading, setLoading] = useRecoilState(loadingState);
   const toast = useToast();
@@ -60,11 +57,11 @@ const MarkCreateDoc: NextPage<Props> = ({ pasteMarkDoc }) => {
     try {
       setLoading(true);
       const docRef = await addDoc(collection(db, 'markDocs'), {
-        customer,
-        deliveryPlace,
-        price: Number(price),
-        repairName,
-        note,
+        customer: markItems?.customer,
+        deliveryPlace: markItems?.deliveryPlace,
+        price: Number(markItems?.price),
+        repairName: markItems?.repairName,
+        note: markItems?.note,
         uid: currentUser[0]?.uid,
       });
       if (!fileUpload) return;
@@ -82,7 +79,6 @@ const MarkCreateDoc: NextPage<Props> = ({ pasteMarkDoc }) => {
           url: arrayUnion(url),
           path: arrayUnion(path),
         });
-        await pasteMarkDoc(docRef.id);
       });
     } catch (err) {
       console.log(err);
@@ -94,11 +90,7 @@ const MarkCreateDoc: NextPage<Props> = ({ pasteMarkDoc }) => {
         isClosable: true,
       });
       setLoading(false);
-      setRepairName('');
-      setCustomer('');
-      setDeliveryPlace('');
-      setPrice('');
-      setNote('');
+      setMarkItems(initMarkItems);
       setFileUpload(null);
     }
   };
@@ -126,108 +118,29 @@ const MarkCreateDoc: NextPage<Props> = ({ pasteMarkDoc }) => {
           <DrawerHeader>仕様書を作成</DrawerHeader>
 
           <DrawerBody>
-            <VStack>
-              <InputGroup w='100%'>
-                <InputLeftAddon children='顧客名' borderColor='#d5d6d9' />
-                <Input
-                  type='text'
-                  bgColor='white'
-                  value={customer}
-                  onChange={(e) => setCustomer(e.target.value)}
-                />
-              </InputGroup>
-
-              <InputGroup w='100%'>
-                <InputLeftAddon children='修理名' borderColor='#d5d6d9' />
-                <Input
-                  type='text'
-                  bgColor='white'
-                  value={repairName}
-                  onChange={(e) => setRepairName(e.target.value)}
-                />
-              </InputGroup>
-              <InputGroup w='100%'>
-                <InputLeftAddon children='修理代' borderColor='#d5d6d9' />
-                <Input
-                  type='number'
-                  bgColor='white'
-                  textAlign='right'
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                />
-                <InputRightAddon children='円' borderColor='#d5d6d9' />
-              </InputGroup>
-              <InputGroup w='100%'>
-                <InputLeftAddon children='納品先' borderColor='#d5d6d9' />
-                <Input
-                  type='text'
-                  bgColor='white'
-                  value={deliveryPlace}
-                  onChange={(e) => setDeliveryPlace(e.target.value)}
-                />
-              </InputGroup>
-            </VStack>
-            <Box w='100%' mt={6}>
-              <Text mb='2px'>内容</Text>
-              <Textarea
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-              />
-            </Box>
-            <Box mt={6}>
-              {!fileUpload && (
-                <Input
-                  type='file'
-                  accept='image/*'
-                  value={fileUpload ? fileUpload.name : ''}
-                  multiple
-                  onChange={(e) => setFileUpload(e.target.files)}
-                />
-              )}
-              {fileUpload && (
-                <>
-                  <Box mt={6}>
-                    {Array.from(fileUpload).map((file: any, index: number) => (
-                      <Box key={file.name} position='relative' mt={6}>
-                        <img
-                          src={window.URL.createObjectURL(file)}
-                          alt={file.name}
-                        />
-
-                        <Box
-                          position='absolute'
-                          top='-18px'
-                          left='50%'
-                          transform='translateX(-50%)'
-                          borderRadius='50%'
-                          bgColor='white'
-                          cursor='pointer'
-                          onClick={() => setFileUpload(null)}
-                        >
-                          <AiFillCloseCircle fontSize='36px' />
-                        </Box>
-                      </Box>
-                    ))}
-                  </Box>
-                </>
-              )}
-            </Box>
+            <MarkCreateInputArea
+              markItems={markItems}
+              setMarkItems={setMarkItems}
+              fileUpload={fileUpload}
+              setFileUpload={setFileUpload}
+            />
           </DrawerBody>
 
           <DrawerFooter>
-            <Button variant='outline' mr={3} onClick={onClose}>
-              キャンセル
-            </Button>
-            <Button
-              disabled={!repairName || !price}
-              colorScheme='blue'
-              onClick={() => {
-                addMarkDoc();
-                onClose();
-              }}
-            >
-              登録
-            </Button>
+            <Flex w='100%' mt={6} justifyContent='center'>
+              <Button variant='outline' mr={3} onClick={onClose}>
+                キャンセル
+              </Button>
+              <Button
+                disabled={!markItems.repairName || !markItems.price}
+                colorScheme='blue'
+                onClick={() => {
+                  addMarkDoc();
+                }}
+              >
+                登録
+              </Button>
+            </Flex>
           </DrawerFooter>
         </DrawerContent>
       </Drawer>

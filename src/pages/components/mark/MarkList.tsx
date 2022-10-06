@@ -41,6 +41,7 @@ const MarkList: NextPage<Props> = ({ markSlips }) => {
     return number;
   };
 
+  // 数量の合計
   const sumQuantity = (array: any) => {
     let sum = 0;
     array.forEach((item: { quantity: number }) => {

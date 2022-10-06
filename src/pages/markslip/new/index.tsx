@@ -176,6 +176,7 @@ const MarkNew = () => {
     setRecord_9(initData);
   };
 
+  // 仕様書貼付け
   const pasteMarkDoc = async (id: string) => {
     const markRef = doc(db, 'markDocs', `${id}`);
     setMarkDocId(id);
@@ -217,7 +218,12 @@ const MarkNew = () => {
                 クリア
               </Button>
             </HStack>
-            <Button px={8} colorScheme='blue' onClick={() => addMarkSlip()}>
+            <Button
+              px={8}
+              colorScheme='blue'
+              onClick={() => addMarkSlip()}
+              disabled={!price || !repairName || !customer}
+            >
               登録
             </Button>
           </Flex>
@@ -253,9 +259,15 @@ const MarkNew = () => {
                 <Input
                   type='text'
                   bgColor='white'
+                  list='browsers'
                   value={deliveryPlace}
                   onChange={(e) => setDeliveryPlace(e.target.value)}
                 />
+                {/* <datalist id='browsers'>
+                  <option value='配送センター' />
+                  <option value='配送センター' />
+                  <option value='配送センター' />
+                </datalist> */}
               </InputGroup>
             </Flex>
 
