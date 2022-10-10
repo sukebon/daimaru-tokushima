@@ -28,21 +28,21 @@ import {
   Textarea,
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 
 const MarkNew = () => {
   const router = useRouter();
   const [textArea, setTextArea] = useState('');
   const currentUser = useAuthState(auth);
   const currentUserId = currentUser[0] && currentUser[0]?.uid;
-  const [customer, setCustomer] = useState('');
-  const [deliveryPlace, setDeliveryPlace] = useState('');
-  const [deadline, setDeadline] = useState('');
-  const [price, setPrice] = useState('');
-  const [note, setNote] = useState('');
-  const [repairName, setRepairName] = useState('');
-  const [markDocId, setMarkDocId] = useState('');
-  const [url, setUrl] = useState<any>([]);
+  const [markItems, setMarkItems] = useState<any>({
+    customer: '',
+    deliveryPlace: '',
+    deadline: '',
+    price: '',
+    note: '',
+    repairName: '',
+    uri: [],
+  });
 
   const initData = {
     productName: '',
@@ -103,6 +103,15 @@ const MarkNew = () => {
     setRecord_9({ ...recordArray[9] });
   };
 
+  // input入力値の変更
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const name = e.target.name;
+    const value = e.target.value;
+    setMarkItems({ ...markItems, [name]: value });
+  };
+
   // マーク伝票を登録
   const addMarkSlip = async () => {
     const result = window.confirm('登録して宜しいでしょうか');
@@ -126,13 +135,13 @@ const MarkNew = () => {
         const markSlipsRef = doc(db, 'markSlips', `${count}`);
         transaction.set(markSlipsRef, {
           uid: currentUserId,
-          customer,
-          deadline,
-          repairName,
-          deliveryPlace,
-          price: Number(price),
-          note,
-          url,
+          customer: markItems.customer,
+          deadline: markItems.deadline,
+          repairName: markItems.repairName,
+          deliveryPlace: markItems.deliveryPlace,
+          price: Number(markItems.price),
+          note: markItems.note,
+          url: markItems.url,
           assort: 0,
           createdAt: serverTimestamp(),
           data: [
@@ -156,14 +165,17 @@ const MarkNew = () => {
     }
   };
 
+  // mark伝票クリア
   const onClear = () => {
-    setCustomer('');
-    setDeliveryPlace('');
-    setDeadline('');
-    setPrice('');
-    setNote('');
-    setRepairName('');
-    setUrl('');
+    setMarkItems({
+      customer: '',
+      deliveryPlace: '',
+      deadline: '',
+      price: '',
+      note: '',
+      repairName: '',
+      url: [],
+    });
     setRecord_0(initData);
     setRecord_1(initData);
     setRecord_2(initData);
@@ -179,15 +191,9 @@ const MarkNew = () => {
   // 仕様書貼付け
   const pasteMarkDoc = async (id: string) => {
     const markRef = doc(db, 'markDocs', `${id}`);
-    setMarkDocId(id);
     const docSnap = await getDoc(markRef);
     if (docSnap.exists()) {
-      setCustomer(docSnap.data().customer);
-      setDeliveryPlace(docSnap.data().deliveryPlace);
-      setPrice(docSnap.data().price);
-      setNote(docSnap.data().note);
-      setRepairName(docSnap.data().repairName);
-      setUrl(docSnap.data().url);
+      setMarkItems({ ...docSnap.data() });
     }
   };
 
@@ -199,7 +205,7 @@ const MarkNew = () => {
         <link rel='icon' href='/favicon.ico' />
       </Head>
 
-      <main>
+      <Box as='main'>
         <Container maxW='1000px' mt={6} p={6}>
           <Flex justifyContent='space-between'>
             <HStack spacing={2}>
@@ -222,7 +228,9 @@ const MarkNew = () => {
               px={8}
               colorScheme='blue'
               onClick={() => addMarkSlip()}
-              disabled={!price || !repairName || !customer}
+              disabled={
+                !markItems.price || !markItems.repairName || !markItems.customer
+              }
             >
               登録
             </Button>
@@ -237,18 +245,20 @@ const MarkNew = () => {
                 <InputLeftAddon children='顧客名' borderColor='#d5d6d9' />
                 <Input
                   type='text'
+                  name='customer'
                   bgColor='white'
-                  value={customer}
-                  onChange={(e) => setCustomer(e.target.value)}
+                  value={markItems.customer}
+                  onChange={(e) => handleInputChange(e)}
                 />
               </InputGroup>
               <InputGroup w={{ base: '100%', md: '30%' }}>
                 <InputLeftAddon children='希望納期' borderColor='#d5d6d9' />
                 <Input
                   type='date'
+                  name='deadline'
                   bgColor='white'
-                  value={deadline}
-                  onChange={(e) => setDeadline(e.target.value)}
+                  value={markItems.deadline}
+                  onChange={handleInputChange}
                 />
               </InputGroup>
             </Flex>
@@ -258,16 +268,11 @@ const MarkNew = () => {
                 <InputLeftAddon children='納品先' borderColor='#d5d6d9' />
                 <Input
                   type='text'
+                  name='deliveryPlace'
                   bgColor='white'
-                  list='browsers'
-                  value={deliveryPlace}
-                  onChange={(e) => setDeliveryPlace(e.target.value)}
+                  value={markItems.deliveryPlace}
+                  onChange={handleInputChange}
                 />
-                {/* <datalist id='browsers'>
-                  <option value='配送センター' />
-                  <option value='配送センター' />
-                  <option value='配送センター' />
-                </datalist> */}
               </InputGroup>
             </Flex>
 
@@ -303,19 +308,21 @@ const MarkNew = () => {
               <InputLeftAddon children='修理名' borderColor='#d5d6d9' />
               <Input
                 type='text'
+                name='repairName'
                 bgColor='white'
-                value={repairName}
-                onChange={(e) => setRepairName(e.target.value)}
+                value={markItems.repairName}
+                onChange={handleInputChange}
               />
             </InputGroup>
             <InputGroup w={{ base: '100%', md: '30%' }}>
               <InputLeftAddon children='修理代' borderColor='#d5d6d9' />
               <Input
                 type='number'
+                name='price'
                 bgColor='white'
                 textAlign='right'
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
+                value={markItems.price}
+                onChange={handleInputChange}
               />
               <InputRightAddon children='円' borderColor='#d5d6d9' />
             </InputGroup>
@@ -327,11 +334,12 @@ const MarkNew = () => {
             whiteSpace='pre-wrap'
             minH='15rem'
             placeholder='内容：'
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
+            name='note'
+            value={markItems.note}
+            onChange={handleInputChange}
           />
-          {url &&
-            url.map((image: any) => (
+          {markItems.url &&
+            markItems.url.map((image: any) => (
               <Box key={image} mt={6} position='relative'>
                 <img src={image} alt={image} width='100%' height='auto' />
                 <Box
@@ -342,14 +350,14 @@ const MarkNew = () => {
                   borderRadius='50%'
                   bgColor='white'
                   cursor='pointer'
-                  onClick={() => setUrl(null)}
+                  onClick={() => setMarkItems({ ...markItems, url: [] })}
                 >
                   <AiFillCloseCircle fontSize='36px' />
                 </Box>
               </Box>
             ))}
         </Container>
-      </main>
+      </Box>
     </Box>
   );
 };

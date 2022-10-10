@@ -1,34 +1,20 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable react/no-children-prop */
+
+import { NextPage } from 'next';
 import {
   Box,
-  Button,
-  Flex,
   Input,
   InputGroup,
   InputLeftAddon,
   InputRightAddon,
   Text,
   Textarea,
-  useDisclosure,
-  useToast,
   VStack,
 } from '@chakra-ui/react';
-import {
-  addDoc,
-  arrayUnion,
-  collection,
-  doc,
-  updateDoc,
-} from 'firebase/firestore';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { NextPage } from 'next';
-import React, { useState } from 'react';
-import { useAuthState } from 'react-firebase-hooks/auth';
+
 import { AiFillCloseCircle } from 'react-icons/ai';
-import { useRecoilState } from 'recoil';
-import { auth, db, storage } from '../../../../firebase';
-import { loadingState } from '../../../../store';
+import { connectAuthEmulator } from 'firebase/auth';
 
 type Props = {
   markItems: {
@@ -40,17 +26,16 @@ type Props = {
   };
   setMarkItems: Function;
   fileUpload: any;
-  setFileUpload: any;
+  setFileUpload: Function;
 };
 
-const MarkCreateInputArea: NextPage<Props> = ({
+const MarkCreateInput: NextPage<Props> = ({
   markItems,
   setMarkItems,
   fileUpload,
   setFileUpload,
 }) => {
-  const currentUser = useAuthState(auth);
-
+  // input要素の値変更
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -78,10 +63,17 @@ const MarkCreateInputArea: NextPage<Props> = ({
           <Input
             type='text'
             bgColor='white'
+            list='repairName'
             name='repairName'
             value={markItems?.repairName}
             onChange={handleInputChange}
           />
+          <datalist id='repairName'>
+            <option value='裾上げ（ルイス）' />
+            <option value='裾上げ（たたき）' />
+            <option value='ワッペン付け' />
+            <option value='ネーム付け' />
+          </datalist>
         </InputGroup>
         <InputGroup w='100%'>
           <InputLeftAddon children='修理代' borderColor='#d5d6d9' />
@@ -115,7 +107,7 @@ const MarkCreateInputArea: NextPage<Props> = ({
         />
       </Box>
       <Box mt={6}>
-        {!fileUpload && (
+        {(!fileUpload || fileUpload.length === 0) && (
           <Input
             type='file'
             accept='image/*'
@@ -139,7 +131,13 @@ const MarkCreateInputArea: NextPage<Props> = ({
                     borderRadius='50%'
                     bgColor='white'
                     cursor='pointer'
-                    onClick={() => setFileUpload(null)}
+                    onClick={() => {
+                      setFileUpload(
+                        Array.from(fileUpload).filter((file, i) =>
+                          i === index ? false : true
+                        )
+                      );
+                    }}
                   >
                     <AiFillCloseCircle fontSize='36px' />
                   </Box>
@@ -153,4 +151,4 @@ const MarkCreateInputArea: NextPage<Props> = ({
   );
 };
 
-export default MarkCreateInputArea;
+export default MarkCreateInput;

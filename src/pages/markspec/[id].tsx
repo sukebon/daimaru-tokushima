@@ -19,28 +19,33 @@ import {
   VStack,
   useToast,
 } from '@chakra-ui/react';
-import { db, storage } from '../../../firebase';
-import { arrayUnion, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { auth, db, storage } from '../../../firebase';
 import {
-  deleteObject,
-  getDownloadURL,
-  ref,
-  uploadBytes,
-} from 'firebase/storage';
-import { useRecoilState } from 'recoil';
+  addDoc,
+  arrayUnion,
+  collection,
+  doc,
+  getDoc,
+  onSnapshot,
+  serverTimestamp,
+  updateDoc,
+} from 'firebase/firestore';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { useSetRecoilState } from 'recoil';
 import { loadingState } from '../../../store';
+import { useAuthState } from 'react-firebase-hooks/auth';
 
 const MarkSpecId = () => {
   const router = useRouter();
-  const [repairName, setRepairName] = useState('');
-  const [customer, setCustomer] = useState('');
-  const [deliveryPlace, setDeliveryPlace] = useState('');
-  const [price, setPrice] = useState('');
-  const [note, setNote] = useState('');
+  const user = useAuthState(auth);
+  const currentUser = user[0]?.uid;
+  const setLoading = useSetRecoilState(loadingState);
+  const [markItems, setMarkItems] = useState<any>();
   const [url, setUrl] = useState([]);
   const [path, setPath] = useState([]);
   const [fileUpload, setFileUpload] = useState<File | any>();
-  const [loading, setLoading] = useRecoilState(loadingState);
+  const [comment, setComment] = useState('');
+  const [comments, setComments] = useState<any>([]);
   const toast = useToast();
 
   // 仕様書を取得
@@ -51,13 +56,9 @@ const MarkSpecId = () => {
         setLoading(true);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setCustomer(docSnap.data().customer);
-          setDeliveryPlace(docSnap.data().deliveryPlace);
-          setRepairName(docSnap.data().repairName);
-          setPrice(docSnap.data().price);
-          setNote(docSnap.data().note);
+          setMarkItems({ ...docSnap.data() });
           setUrl(docSnap.data().url);
-          setPath(docSnap.data().path);
+          setPath(docSnap.data().url);
         }
       } catch (err) {
         console.log(err);
@@ -67,6 +68,19 @@ const MarkSpecId = () => {
     };
     getMarkDoc();
   }, [router.query.id, fileUpload, setLoading, toast]);
+
+  //コメントを取得
+  useEffect(() => {
+    const getComments = async () => {
+      const unsub = onSnapshot(
+        collection(db, 'markDocs', `${router.query.id}`, 'comments'),
+        (doc) => {
+          setComments(doc.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+        }
+      );
+    };
+    getComments();
+  }, [router.query.id]);
 
   // 画像を削除
   const deleteDocImage = async () => {
@@ -89,21 +103,19 @@ const MarkSpecId = () => {
     }
   };
 
+  //仕様書の更新
   const updateMarkDoc = async () => {
     const result = window.confirm('更新して宜しいでしょうか');
     if (!result) return;
     try {
       setLoading(true);
-      const docRef = await updateDoc(
-        doc(db, 'markDocs', `${router.query.id}`),
-        {
-          customer,
-          deliveryPlace,
-          repairName,
-          price: Number(price),
-          note,
-        }
-      );
+      await updateDoc(doc(db, 'markDocs', `${router.query.id}`), {
+        customer: markItems.customer,
+        deliveryPlace: markItems.deliveryPlace,
+        repairName: markItems.repairName,
+        price: Number(markItems.price),
+        note: markItems.note,
+      });
       if (!fileUpload) return;
 
       Array.from(fileUpload).forEach(async (file: any) => {
@@ -135,6 +147,26 @@ const MarkSpecId = () => {
     }
   };
 
+  //コメントを追加
+  const addComment = () => {
+    const docRef = collection(db, 'markDocs', `${router.query.id}`, 'comments');
+    addDoc(docRef, {
+      writer: currentUser,
+      comment,
+      createdAt: serverTimestamp(),
+    });
+    setComment('');
+  };
+
+  // input要素の値変更
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const value = e.target.value;
+    const name = e.target.name;
+    setMarkItems({ ...markItems, [name]: value });
+  };
+
   return (
     <Box p={6}>
       <Container maxW='600px' mt={12} p={6} bgColor='white'>
@@ -146,42 +178,50 @@ const MarkSpecId = () => {
             <InputLeftAddon children='顧客名' borderColor='#d5d6d9' />
             <Input
               type='text'
+              name='customer'
               bgColor='white'
-              value={customer}
-              onChange={(e) => setCustomer(e.target.value)}
+              value={markItems?.customer}
+              onChange={handleInputChange}
             />
           </InputGroup>
           <InputGroup w='100%'>
             <InputLeftAddon children='修理名' borderColor='#d5d6d9' />
             <Input
               type='text'
+              name='repairName'
               bgColor='white'
-              value={repairName}
-              onChange={(e) => setRepairName(e.target.value)}
+              value={markItems?.repairName}
+              onChange={handleInputChange}
             />
           </InputGroup>
           <InputGroup w='100%'>
             <InputLeftAddon children='修理代' borderColor='#d5d6d9' />
             <Input
               type='number'
+              name='price'
               bgColor='white'
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
+              value={markItems?.price}
+              onChange={handleInputChange}
             />
           </InputGroup>
           <InputGroup w='100%'>
             <InputLeftAddon children='納品先' borderColor='#d5d6d9' />
             <Input
               type='text'
+              name='deliveryPlace'
               bgColor='white'
-              value={deliveryPlace}
-              onChange={(e) => setDeliveryPlace(e.target.value)}
+              value={markItems?.deliveryPlace}
+              onChange={handleInputChange}
             />
           </InputGroup>
         </VStack>
         <Box w='100%' mt={6}>
           <Text mb='2px'>内容</Text>
-          <Textarea value={note} onChange={(e) => setNote(e.target.value)} />
+          <Textarea
+            name='note'
+            value={markItems?.note}
+            onChange={handleInputChange}
+          />
         </Box>
         {url.length !== 0 && (
           <Box mt={6} position='relative'>
@@ -258,6 +298,38 @@ const MarkSpecId = () => {
             更新
           </Button>
         </Flex>
+      </Container>
+      <Container maxW='600px' mt={6} p={3} bgColor='white'>
+        <Box>コメントを書く</Box>
+        <Textarea
+          mt={2}
+          name='comment'
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+        />
+        <Box textAlign='center'>
+          <Button
+            mt={3}
+            size='sm'
+            colorScheme='blue'
+            disabled={!comment}
+            onClick={addComment}
+          >
+            送信
+          </Button>
+        </Box>
+        <Box>
+          {comments?.map(
+            (comment: { id: string; comment: string; createdAt: any }) => (
+              <Box key={comment.id}>
+                <Box>
+                  {comment.createdAt.toDate().toLocaleTimeString('en-US')}
+                </Box>
+                {comment.comment}
+              </Box>
+            )
+          )}
+        </Box>
       </Container>
     </Box>
   );

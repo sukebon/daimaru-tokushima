@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { NextPage } from 'next';
 import {
+  Box,
   Button,
   Drawer,
   DrawerBody,
@@ -12,15 +13,10 @@ import {
   DrawerHeader,
   DrawerOverlay,
   Flex,
+  Toast,
   useDisclosure,
-  useToast,
 } from '@chakra-ui/react';
 
-import MarkCreateInputArea from './MarkCreateInputArea';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth, db, storage } from '../../../../firebase';
-import { useRecoilState } from 'recoil';
-import { loadingState } from '../../../../store';
 import {
   addDoc,
   arrayUnion,
@@ -29,6 +25,11 @@ import {
   updateDoc,
 } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth, db, storage } from '../../../../firebase';
+import { useSetRecoilState } from 'recoil';
+import { loadingState } from '../../../../store';
+import MarkCreateInput from './MarkCreateInput';
 
 type Props = {
   pasteMarkDoc: Function;
@@ -47,8 +48,7 @@ const MarkCreateDoc: NextPage<Props> = ({ pasteMarkDoc }) => {
   };
   const [markItems, setMarkItems] = useState(initMarkItems);
   const [fileUpload, setFileUpload] = useState<File | any>(null);
-  const [loading, setLoading] = useRecoilState(loadingState);
-  const toast = useToast();
+  const setLoading = useSetRecoilState(loadingState);
 
   const addMarkDoc = async () => {
     const result = window.confirm('登録して宜しいでしょうか');
@@ -64,6 +64,7 @@ const MarkCreateDoc: NextPage<Props> = ({ pasteMarkDoc }) => {
         note: markItems?.note,
         uid: currentUser[0]?.uid,
       });
+      pasteMarkDoc(docRef.id); //仕様書を貼り付ける
       if (!fileUpload) return;
 
       Array.from(fileUpload).forEach(async (file: any) => {
@@ -83,7 +84,7 @@ const MarkCreateDoc: NextPage<Props> = ({ pasteMarkDoc }) => {
     } catch (err) {
       console.log(err);
     } finally {
-      toast({
+      Toast({
         title: '仕様書を作成しました',
         status: 'success',
         duration: 2000,
@@ -116,16 +117,14 @@ const MarkCreateDoc: NextPage<Props> = ({ pasteMarkDoc }) => {
         <DrawerContent>
           <DrawerCloseButton />
           <DrawerHeader>仕様書を作成</DrawerHeader>
-
           <DrawerBody>
-            <MarkCreateInputArea
+            <MarkCreateInput
               markItems={markItems}
               setMarkItems={setMarkItems}
               fileUpload={fileUpload}
               setFileUpload={setFileUpload}
             />
           </DrawerBody>
-
           <DrawerFooter>
             <Flex w='100%' mt={6} justifyContent='center'>
               <Button variant='outline' mr={3} onClick={onClose}>

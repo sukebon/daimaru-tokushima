@@ -1,14 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable react/no-children-prop */
-import { useRef, useState } from 'react';
-import {
-  Box,
-  Button,
-  Container,
-  Flex,
-  useDisclosure,
-  useToast,
-} from '@chakra-ui/react';
+import { useState } from 'react';
+import { Box, Button, Container, Flex, Toast } from '@chakra-ui/react';
 import {
   addDoc,
   arrayUnion,
@@ -18,14 +11,12 @@ import {
 } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { useRecoilState } from 'recoil';
 import { auth, db, storage } from '../../../../firebase';
+import { useSetRecoilState } from 'recoil';
 import { loadingState } from '../../../../store';
-import MarkCreateInputArea from '../../components/mark/MarkCreateInputArea';
+import MarkCreateInput from '../../components/mark/MarkCreateInput';
 
 const MarkSpecNew = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const [loading, setLoading] = useRecoilState(loadingState);
   const currentUser = useAuthState(auth);
   const initMarkItems = {
     customer: '',
@@ -36,8 +27,9 @@ const MarkSpecNew = () => {
   };
   const [markItems, setMarkItems] = useState(initMarkItems);
   const [fileUpload, setFileUpload] = useState<File | any>(null);
-  const toast = useToast();
+  const setLoading = useSetRecoilState(loadingState);
 
+  // 仕様書を追加
   const addMarkDoc = async () => {
     const result = window.confirm('登録して宜しいでしょうか');
     if (!result) return;
@@ -71,7 +63,7 @@ const MarkSpecNew = () => {
     } catch (err) {
       console.log(err);
     } finally {
-      toast({
+      Toast({
         title: '仕様書を作成しました',
         status: 'success',
         duration: 2000,
@@ -89,16 +81,13 @@ const MarkSpecNew = () => {
         <Box as='h1' w='100%' fontSize='2xl' textAlign='center'>
           仕様書を作成
         </Box>
-        <MarkCreateInputArea
+        <MarkCreateInput
           markItems={markItems}
           setMarkItems={setMarkItems}
           fileUpload={fileUpload}
           setFileUpload={setFileUpload}
         />
         <Flex w='100%' mt={6} justifyContent='center'>
-          <Button variant='outline' mr={3} onClick={onClose}>
-            キャンセル
-          </Button>
           <Button
             disabled={!markItems.repairName || !markItems.price}
             colorScheme='blue'
